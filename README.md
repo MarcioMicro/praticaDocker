@@ -13,7 +13,25 @@ Documentação de atividade prática do Programa de Bolsas da Compass/UOL sobre 
     - Na Route Table pública foi criada uma rota para a Internet (0.0.0.0/0) associada ao Internet Gateway. Foram associadas a ela as duas subnets públicas.
     - Na Route Table privada foi criada uma rota para a Internet (0.0.0.0/0) associada ao NAT Gateway. Foram associadas a ela as duas subnets privadas.
 
-
+## Criação do banco de dados no serviço RDS
+   - Foi criado um Database do tipo MySQL
+   - configurou-se identificador, usuário e senha
+   - Instância da classe db.t3.micro
+   - Criou-se um Security Group para o banco de dados
+   - Foi definido um database inicial, de nome wordpress
+   
+## Criação das Instâncias
+- Todas as instâncias criadas foram com as seguintes configurações:
+  - Amazon Linux 2023 AMI
+  - t3.small
+  - 8 GiB gp3
+- A primeira instância criada foi pública, responsável pela comunicação SSH com as demais.
+   - Alocada em subnet pública
+   - IP público automático
+   - Security Group com SSH liberado para qualquer IP
+- A segunda instância foi criada como privada, para conter o container com wordpress
+   - 
+  
 
 
 
@@ -66,4 +84,32 @@ services:
 volumes:
     db_data:
 EOF
+```
+```
+#!/bin/bash
+
+# Atualiza os pacotes do sistema
+yum update -y
+
+# Instala o Docker
+yum install -y docker
+
+# Inicia o serviço do Docker
+systemctl start docker.service
+
+# Configura o usuário ec2-user para executar comandos do Docker sem precisar de "sudo"
+usermod -a -G docker ec2-user
+
+# Baixa e executa o container do WordPress
+docker run -e WORDPRESS_DB_HOST=praticadocker-db.cymxgpuymbmd.us-east-1.rds.amazonaws.com \
+  -e WORDPRESS_DB_USER=admin \
+  -e WORDPRESS_DB_PASSWORD=admin123 \
+  -e WORDPRESS_DB_NAME=praticadocker-db \
+  -p 80:80 \
+  --name meu-wordpress \
+  wordpress
+
+
+# Configura o Docker para iniciar automaticamente na inicialização do sistema
+systemctl enable docker.service
 ```
