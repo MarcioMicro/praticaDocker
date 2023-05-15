@@ -21,6 +21,8 @@ Documentação de atividade prática do Programa de Bolsas da Compass/UOL sobre 
 - Para as instâncias privadas
    - Porta 22, a partir da instância Bastion
    - Porta 80, a partir do Load Balancer
+   - Porta 2049, a partir do volume EFS
+   - Porta 3306, a partir do banco de dados RDS
 - Para o banco de dados
    - Apenas a porta 3306, a partir das instâncias privadas
 - Para o volume EFS
