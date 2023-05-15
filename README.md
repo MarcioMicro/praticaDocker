@@ -99,7 +99,7 @@ sudo systemctl start docker-container.service
 
 ## Criação do Load Balancer
 - Foi criado um Load Balancer do tipo internet-facing IPV4 na VPC da atividade
-- Foram selecionados as duas subnets públicas
+- Foram selecionados todas as subnets
 - Foi configurado o Security Group correto
 - Foi criado um Target Group com as duas instâncias privadas
 - Após confirmar tudo, basta acessar o DNS do Load Balancer, que distribuirá o tráfego entre as duas instâncias.
