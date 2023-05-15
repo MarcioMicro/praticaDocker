@@ -15,9 +15,12 @@ Documentação de atividade prática do Programa de Bolsas da Compass/UOL sobre 
 
 ## Criação dos Security Groups
 - Para a instância Bastion
-   - Apenas o serviço de SSH, para qualquer IP
+   - Apenas a porta 22, a partir de qualquer IP
+- Para o Load Balancer
+   - Apenas para a porta 80, a partir de qualquer IP
 - Para as instâncias privadas
-   - Apenas o serviço de SSH, a partir da instância Bastion
+   - Porta 22, a partir da instância Bastion
+   - Porta 80, a partir do Load Balancer
 - Para o banco de dados
    - Apenas a porta 3306, a partir das instâncias privadas
 - Para o volume EFS
@@ -95,6 +98,9 @@ sudo systemctl start docker-container.service
 - Foi criada, então, a terceira instância, a partir dessa AMI.
 
 ## Criação do Load Balancer
-- 
-
+- Foi criado um Load Balancer do tipo internet-facing IPV4 na VPC da atividade
+- Foram selecionados as duas subnets públicas
+- Foi configurado o Security Group correto
+- Foi criado um Target Group com as duas instâncias privadas
+- Depois disso, basta acessar o DNS do Load Balancer, que distribuirá o tráfego entre as duas instâncias.
 
