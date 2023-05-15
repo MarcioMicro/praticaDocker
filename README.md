@@ -63,19 +63,13 @@ systemctl start docker.service
 usermod -a -G docker ec2-user
 mkdir -m 777 /mnt/nfs
 mount -t nfs4 fs-09f17892f211cfcd1.efs.us-east-1.amazonaws.com:/ /mnt/nfs
-mkdir -m 777 /mnt/nfs/wp-content
-mkdir -m 777 /mnt/nfs/wp-content/uploads
-mkdir -m 777 /mnt/nfs/wp-content/themes
-mkdir -m 777 /mnt/nfs/wp-content/plugins
 docker run -de WORDPRESS_DB_HOST=praticadocker-rds.cymxgpuymbmd.us-east-1.rds.amazonaws.com \
   -e WORDPRESS_DB_USER=admin \
   -e WORDPRESS_DB_PASSWORD=admin123 \
   -e WORDPRESS_DB_NAME=wordpress \
   -p 80:80 \
   --name praticaDockerWordpress \
-  -v /mnt/nfs/wp-content/uploads:/var/www/html/wp-content/uploads \
-  -v /mnt/nfs/wp-content/themes:/var/www/html/wp-content/themes  \
-  -v /mnt/nfs/wp-content/plugins:/var/www/html/wp-content/plugins \
+  -v /mnt/nfs:/var/www/html/ \
   wordpress
 systemctl enable docker.service
 echo "fs-09f17892f211cfcd1.efs.us-east-1.amazonaws.com:/ /mnt/nfs nfs4 defaults,_netdev 0 0" | sudo tee -a /etc/fstab
