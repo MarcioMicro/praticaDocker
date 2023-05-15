@@ -13,103 +13,88 @@ Documentação de atividade prática do Programa de Bolsas da Compass/UOL sobre 
     - Na Route Table pública foi criada uma rota para a Internet (0.0.0.0/0) associada ao Internet Gateway. Foram associadas a ela as duas subnets públicas.
     - Na Route Table privada foi criada uma rota para a Internet (0.0.0.0/0) associada ao NAT Gateway. Foram associadas a ela as duas subnets privadas.
 
+## Criação dos Security Groups
+- Para a instância Bastion
+   - Apenas o serviço de SSH, para qualquer IP
+- Para as instâncias privadas
+   - Apenas o serviço de SSH, a partir da instância Bastion
+- Para o banco de dados
+   - Apenas a porta 3306, a partir das instâncias privadas
+- Para o volume EFS
+   - Apenas para a porta 2049, a partir das instâncias privadas
+
 ## Criação do banco de dados no serviço RDS
-   - Foi criado um Database do tipo MySQL
+- Foi criado um banco de dados do tipo MySQL
    - configurou-se identificador, usuário e senha
    - Instância da classe db.t3.micro
-   - Criou-se um Security Group para o banco de dados
+   - Configurado na VPC da atividade
+   - Configurou-se o Security Group do banco de dados
    - Foi definido um database inicial, de nome wordpress
+
+## Criação do volume EFS
+- Foi criado um volume novo na VPC da atividade
+- Na guia Network, as subnets foram configuradas com o Security Group do volume EFS
+- Foi criado um access point apontando para o volume
    
 ## Criação das Instâncias
 - Todas as instâncias criadas foram com as seguintes configurações:
-  - Amazon Linux 2023 AMI
-  - t3.small
-  - 8 GiB gp3
+   - Amazon Linux 2023 AMI
+   - t3.small
+   - 8 GiB gp3
 - A primeira instância criada foi pública, responsável pela comunicação SSH com as demais.
    - Alocada em subnet pública
    - IP público automático
-   - Security Group com SSH liberado para qualquer IP
+   - Security Group Bastion
 - A segunda instância foi criada como privada, para conter o container com wordpress
-   - 
-  
-
-
-
-
+   - Alocada em subnet privada
+   - Sem IP público
+   - Security Group privado
+   - Criado com o seguinte user data:
 
 ```
 #!/bin/bash
 
-# Instalação do Docker
 yum update -y
-amazon-linux-extras install docker -y
-systemctl start docker
-systemctl enable docker
-
-# Instalação do Docker Compose
-yum install -y curl
-curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-
-# Criação da pasta do projeto e arquivo docker-compose.yml
-mkdir wordpress
-cd wordpress
-touch docker-compose.yml
-cat <<EOF > docker-compose.yml
-version: '3'
-
-services:
-   db:
-     image: mysql:5.7
-     volumes:
-       - db_data:/var/lib/mysql
-     restart: always
-     environment:
-       MYSQL_ROOT_PASSWORD: your_password
-       MYSQL_DATABASE: wordpress
-       MYSQL_USER: wordpress
-       MYSQL_PASSWORD: your_password
-   wordpress:
-     depends_on:
-       - db
-     image: wordpress:latest
-     ports:
-       - "80:80"
-     restart: always
-     environment:
-       WORDPRESS_DB_HOST: your_rds_endpoint
-       WORDPRESS_DB_USER: wordpress
-       WORDPRESS_DB_PASSWORD: your_password
-       WORDPRESS_DB_NAME: wordpress
-volumes:
-    db_data:
-EOF
-```
-```
-#!/bin/bash
-
-# Atualiza os pacotes do sistema
-yum update -y
-
-# Instala o Docker
 yum install -y docker
-
-# Inicia o serviço do Docker
 systemctl start docker.service
-
-# Configura o usuário ec2-user para executar comandos do Docker sem precisar de "sudo"
 usermod -a -G docker ec2-user
-
-# Baixa e executa o container do WordPress
-docker run -e WORDPRESS_DB_HOST=praticadocker-db.cymxgpuymbmd.us-east-1.rds.amazonaws.com \
+mkdir -m 777 /mnt/nfs
+mount -t nfs4 fs-09f17892f211cfcd1.efs.us-east-1.amazonaws.com:/ /mnt/nfs
+mkdir -m 777 /mnt/nfs/wp-content
+mkdir -m 777 /mnt/nfs/wp-content/uploads
+mkdir -m 777 /mnt/nfs/wp-content/themes
+mkdir -m 777 /mnt/nfs/wp-content/plugins
+docker run -de WORDPRESS_DB_HOST=praticadocker-rds.cymxgpuymbmd.us-east-1.rds.amazonaws.com \
   -e WORDPRESS_DB_USER=admin \
   -e WORDPRESS_DB_PASSWORD=admin123 \
-  -e WORDPRESS_DB_NAME=praticadocker-db \
+  -e WORDPRESS_DB_NAME=wordpress \
   -p 80:80 \
-  --name meu-wordpress \
+  --name praticaDockerWordpress \
+  -v /mnt/nfs/wp-content/uploads:/var/www/html/wp-content/uploads \
+  -v /mnt/nfs/wp-content/themes:/var/www/html/wp-content/themes  \
+  -v /mnt/nfs/wp-content/plugins:/var/www/html/wp-content/plugins \
   wordpress
-
-
-# Configura o Docker para iniciar automaticamente na inicialização do sistema
 systemctl enable docker.service
+echo "fs-09f17892f211cfcd1.efs.us-east-1.amazonaws.com:/ /mnt/nfs nfs4 defaults,_netdev 0 0" | sudo tee -a /etc/fstab
+echo "[Unit]
+Description=Docker Container Service
+After=docker.service
+
+[Service]
+ExecStart=/usr/bin/docker start praticaDockerWordpress
+
+[Install]
+WantedBy=multi-user.target" | tee /etc/systemd/system/docker-container.service
+
+sudo systemctl enable docker-container.service
+sudo systemctl start docker-container.service
+
 ```
+
+- Após a criação da segunda instância, foi criada uma AMI baseada no seu estado atual
+- Foi criada, então, a terceira instância, a partir dessa AMI.
+
+## Criação do Load Balancer
+- 
+
+
