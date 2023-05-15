@@ -102,5 +102,5 @@ sudo systemctl start docker-container.service
 - Foram selecionados as duas subnets públicas
 - Foi configurado o Security Group correto
 - Foi criado um Target Group com as duas instâncias privadas
-- Depois disso, basta acessar o DNS do Load Balancer, que distribuirá o tráfego entre as duas instâncias.
+- Após confirmar tudo, basta acessar o DNS do Load Balancer, que distribuirá o tráfego entre as duas instâncias.
 
