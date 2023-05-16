@@ -5,7 +5,7 @@ Documentação de atividade prática do Programa de Bolsas da Compass/UOL sobre 
 - Para essa atividade, optou-se por criar uma VPC com dois ranges de CIDR pequenos:
    - 192.168.1.0/24: para subnets privadas
    - 192.168.2.0/24: para subnets públicas
-- Foram configuradas duas subnets privadas e duas subnets públicas, respeitando ranges IP e zonas de disponibilidade distintas.
+- Foram configuradas duas subnets privadas e duas subnets públicas, respeitando ranges IP e zonas de disponibilidade distintas (1 pública e uma privada em cada AZ).
 - Foi criado e associado um Internet Gateway à VPC, para liberar comunicação com a Internet.
 - Foi criado um NAT Gateway, alocado um Elastic IP, e associado a uma subnet pública, a fim de garantir tráfego de saída para a Internet às subnets privadas.
 - Em Route tables:
