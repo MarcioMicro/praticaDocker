@@ -65,7 +65,7 @@ systemctl start docker.service
 usermod -a -G docker ec2-user
 mkdir -m 777 /mnt/nfs
 mount -t nfs4 <dns_do_efs>:/ /mnt/nfs
-docker run -de WORDPRESS_DB_HOST=<dns_do_rds> \
+docker run -de WORDPRESS_DB_HOST=<Endpoint_do_rds> \
   -e WORDPRESS_DB_USER=<usuário> \
   -e WORDPRESS_DB_PASSWORD=<senha> \
   -e WORDPRESS_DB_NAME=wordpress \
