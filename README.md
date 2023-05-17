@@ -64,23 +64,23 @@ yum install -y docker
 systemctl start docker.service
 usermod -a -G docker ec2-user
 mkdir -m 777 /mnt/nfs
-mount -t nfs4 fs-09f17892f211cfcd1.efs.us-east-1.amazonaws.com:/ /mnt/nfs
-docker run -de WORDPRESS_DB_HOST=praticadocker-rds.cymxgpuymbmd.us-east-1.rds.amazonaws.com \
-  -e WORDPRESS_DB_USER=admin \
-  -e WORDPRESS_DB_PASSWORD=admin123 \
+mount -t nfs4 <dns_do_efs>:/ /mnt/nfs
+docker run -de WORDPRESS_DB_HOST=<dns_do_rds> \
+  -e WORDPRESS_DB_USER=<usuário> \
+  -e WORDPRESS_DB_PASSWORD=<senha> \
   -e WORDPRESS_DB_NAME=wordpress \
   -p 80:80 \
-  --name praticaDockerWordpress \
+  --name <nome_do_conteiner> \
   -v /mnt/nfs:/var/www/html/ \
   wordpress
 systemctl enable docker.service
-echo "fs-09f17892f211cfcd1.efs.us-east-1.amazonaws.com:/ /mnt/nfs nfs4 defaults,_netdev 0 0" | sudo tee -a /etc/fstab
+echo "<dns_do_efs>:/ /mnt/nfs nfs4 defaults,_netdev 0 0" | sudo tee -a /etc/fstab
 echo "[Unit]
 Description=Docker Container Service
 After=docker.service
 
 [Service]
-ExecStart=/usr/bin/docker start praticaDockerWordpress
+ExecStart=/usr/bin/docker start <nome_do_conteiner>
 
 [Install]
 WantedBy=multi-user.target" | tee /etc/systemd/system/docker-container.service
