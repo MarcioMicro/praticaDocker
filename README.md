@@ -100,3 +100,11 @@ sudo systemctl start docker-container.service
 - Foi criado um Target Group com as duas instâncias privadas
 - Após confirmar tudo, basta acessar o DNS do Load Balancer, que distribuirá o tráfego entre as duas instâncias.
 
+## Criação do Auto Scaling
+- Para o Auto Scaling foi criado um Template
+   - Foi escolhida a AMI criada anteriormente
+   - Mesma subnet, security group e tipo de instância dos servers wordpress
+   - Devem ser editadas as tags
+- Foi então criado um Auto Scaling Group, com base no template
+   - Foi escolhida a VPC da atividade e as duas subnets privadas
+   - Foi escolhido o Target Group do Load Balancer
